@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright (C) 2013 Miguel González
-#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -16,88 +14,90 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import json
-import shlex
-import subprocess
-import sys
+from shell import nmcli
 
 
 DOCUMENTATION = '''
 ---
 module: nmcli
-short_description: Gather networkmanager information using nmcli
+short_description: Pythonification of nmcli wrapper
 description:
     - Execute nmcli command to gather information about network manager
-      devices. The information is available as ansible_facts.
-author: Miguel González
+      devices.
 '''
 
 
-EXAMPLES = '''
-# Get local devices
-- hosts: 127.0.0.1
-  connection: local
-  tasks:
-    - name: get custom facts
-      action: nmcli
-'''
+class NMCLI(object):
+    pass
 
 
-NMCLI_FIELDS = {
-    'nm': "RUNNING STATE WIFI-HARDWARE WIFI WWAN-HARDWARE WWAN".split(),
-    'con': "NAME UUID TYPE TIMESTAMP-REAL".split(),
-    'dev': "DEVICE TYPE STATE".split(),
-}
+class NMCommand(object):
+    def __init__(self, cmdname, commands):
+        self.cmdname = cmdname
+        for command, possibleargs in commands:
+            setattr(self, command, self.gen_action(command, possibleargs))
+
+    def gen_action(self, command, possibleargs):
+        def sanitize_args(args):
+            def sanitize_arg(arg):
+                if isinstance(arg, bool):
+                    return str(arg).lower()
+
+                if isinstance(arg, int):
+                    return str(arg)
+
+                if arg:
+                    return arg.lower()
+                return arg
+
+            if isinstance(args, list):
+                newargs = []
+                for arg in args:
+                    newargs.append(sanitize_arg(arg))
+                return newargs
+            else:
+                return sanitize_arg(args)
+
+        usableargs = sanitize_args(possibleargs)
+
+        def verify_arg(arg):
+            arg = sanitize_args(arg)
+            if arg not in usableargs:
+                raise Exception(
+                    "%s is not a valid argument for '%s'. Parameters: %s" % (
+                        arg, command, possibleargs))
+            return arg
+
+        def verify_args(args):
+            return [verify_arg(arg) for arg in args]
+
+        def run_action(args=None):
+            if isinstance(args, list):
+                cmd = command + ' '.join(verify_args(args))
+            elif args:
+                cmd = "%s %s" % (command, verify_arg(args))
+            else:
+                cmd = command
+
+            # Do some kind of verification on the
+            # args here....
+            return nmcli(self.cmdname,
+                   command=cmd)
+
+        return run_action
 
 
-def _shell(args):
-    """Execute args and returns status code, stdout and stderr"""
-    try:
-        process = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        retcode = process.returncode
-    except Exception as e:
-        cmd = " ".join(args)
-        msg = "{0} when executing command '{1}'".format(repr(e), cmd)
-        fail_json(msg)
-
-    return retcode, stdout, stderr
-
-
-def _nmcli(obj, command=None, fields=None, multiline=False):
-    """Wraps nmcli execution"""
-    if fields is None:
-        fields = NMCLI_FIELDS[obj]
-
-    args = ['nmcli', '--terse', '--fields', ",".join(fields), obj]
-    if command:
-        args += shlex.split(command)
-    retcode, stdout, stderr = _shell(args)
-
-    data = []
-    if retcode == 0:
-        if multiline:
-            # prev_field = None
-            row = {}
-            for line in stdout.split('\n'):
-                values = line.split(':', 1)
-                if len(values) == 2:
-                    multikey, value = values
-                    field, prop = multikey.split('.')
-                    row[prop] = value
-            data.append(row)
-        else:
-            for line in stdout.split('\n'):
-                values = line.split(':')
-                if len(values) == len(fields):
-                    row = dict(zip(fields, values))
-                    data.append(row)
-        return data
-    else:
-        msg = "nmcli return {0} code. STDERR='{1}'".format(retcode, stderr)
-        fail_json(msg)
+# @TODO: I'm sure there is a way to introspect all of this from
+# nmcli itself.  I don't feel like doing the text parsing
+# right now though.
+NMCLI.nm = NMCommand(
+        "nm",
+        [("status", None),
+         ("enable", [True, False]),
+         ("sleep", [True, False]),
+         ("wifi", ["on", "off"]),
+         ("wwan", ["on", "off"])]
+        )
 
 
 def get_nm_status():
@@ -132,29 +132,8 @@ def main(**kwargs):
         devices[iface].update(details)
     nm['devices'] = devices
 
-    exit_json(ansible_facts={'ansible_networkmanager': nm})
-
-
-def exit_json(changed=True, **kwargs):
-    result = {'changed': changed}
-    result.update(kwargs)
-    print json.dumps(result, sort_keys=False, indent=2)
-    sys.exit(0)
-
-
-def fail_json(msg):
-    print json.dumps({"failed": True, "msg": msg}, indent=2)
-    sys.exit(1)
-
 
 if __name__ == '__main__':
-    try:
-        args_file = sys.argv[1]
-    except IndexError:
-        fail_json('No argument file')
-
-    args_data = file(args_file).read()
-    arguments = shlex.split(args_data)
-    kwargs = dict([arg.split("=") for arg in arguments if "=" in arg])
-
-    main(**kwargs)
+    #print NMCLI.nm.status()
+    print NMCLI.nm.enable(True)
+    print NMCLI.nm.enable("asdasd")
