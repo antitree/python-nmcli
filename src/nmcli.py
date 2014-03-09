@@ -79,8 +79,6 @@ class NMCommand(object):
             else:
                 cmd = command
 
-            # Do some kind of verification on the
-            # args here....
             return nmcli(self.cmdname,
                    command=cmd)
 
