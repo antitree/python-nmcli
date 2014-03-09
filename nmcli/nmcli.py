@@ -26,9 +26,7 @@ description:
       devices.
 '''
 
-
-class NMCLI(object):
-    pass
+__all__ = ["nm", "dev", "con"]
 
 
 class NMCommand(object):
@@ -46,8 +44,9 @@ class NMCommand(object):
                 if isinstance(arg, int):
                     return str(arg)
 
-                if arg:
+                if arg is not None:
                     return arg.lower()
+
                 return arg
 
             if isinstance(args, list):
@@ -72,7 +71,7 @@ class NMCommand(object):
             return [verify_arg(arg) for arg in args]
 
         def run_action(args=None, **kwargs):
-            if not args:
+            if args is None:
                 args = []
 
             if not isinstance(args, list):
@@ -106,7 +105,7 @@ class NMCommand(object):
 # @TODO: I'm sure there is a way to introspect all of this from
 # nmcli itself.  I don't feel like doing the text parsing
 # right now though.
-NMCLI.nm = NMCommand(
+nm = NMCommand(
         "nm",
         [("status", None),
          ("enable", [True, False]),
@@ -115,7 +114,7 @@ NMCLI.nm = NMCommand(
          ("wwan", ["on", "off"])]
         )
 
-NMCLI.con = NMCommand(
+con = NMCommand(
     "con",
     [("list", [None, "id", "uuid"]),
      ("status", [None, "id", "uuid", "path"]),
@@ -125,7 +124,7 @@ NMCLI.con = NMCommand(
     ])
 
 
-NMCLI.dev = NMCommand(
+dev = NMCommand(
     "dev",
     [("status", None),
      ("list", [None, "iface"]),
