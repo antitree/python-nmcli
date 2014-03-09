@@ -60,7 +60,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
     if fields is None:
         fields = NMCLI_FIELDS[obj]
 
-    if "list" in command:
+    if "list" in command and "id" in command:
         multiline = True
         fields = NMCLI_FIELDS["%s list" % obj]
 
@@ -68,6 +68,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
 
     if command:
         args += shlex.split(command)
+
     retcode, stdout, stderr = shell(args)
 
     data = []
