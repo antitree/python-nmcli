@@ -33,6 +33,12 @@ NMCLI_FIELDS = {
     'nm': "RUNNING STATE WIFI-HARDWARE WIFI WWAN-HARDWARE WWAN".split(),
     'con': "NAME UUID TYPE TIMESTAMP-REAL".split(),
     'dev': "DEVICE TYPE STATE".split(),
+    'con list': (
+        "connection,802-3-ethernet,802-1x,802-11-wireless," +
+        "802-11-wireless-security,ipv4,ipv6,serial,ppp,pppoe," +
+        "gsm,cdma,bluetooth,802-11-olpc-mesh,vpn,infiniband,bond," +
+        "vlan").split(",")
+
 }
 
 
@@ -54,7 +60,12 @@ def nmcli(obj, command=None, fields=None, multiline=False):
     if fields is None:
         fields = NMCLI_FIELDS[obj]
 
+    if "list" in command:
+        multiline = True
+        fields = NMCLI_FIELDS["%s list" % obj]
+
     args = ['nmcli', '--terse', '--fields', ",".join(fields), obj]
+
     if command:
         args += shlex.split(command)
     retcode, stdout, stderr = shell(args)

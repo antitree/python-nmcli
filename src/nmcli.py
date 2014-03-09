@@ -71,16 +71,34 @@ class NMCommand(object):
         def verify_args(args):
             return [verify_arg(arg) for arg in args]
 
-        def run_action(args=None):
-            if isinstance(args, list):
-                cmd = command + ' '.join(verify_args(args))
-            elif args:
-                cmd = "%s %s" % (command, verify_arg(args))
-            else:
+        def run_action(args=None, **kwargs):
+            if not args:
+                args = []
+
+            if not isinstance(args, list):
+                args = [args]
+
+            if kwargs:
+                args.extend(kwargs.keys())
+
+            args = verify_args(args)
+
+            if not args:
                 cmd = command
+            else:
+                opts = []
+                for arg in args:
+                    if arg not in kwargs:
+                        opts.append(arg)
+                    else:
+                        opts.append("%s %s" % (
+                                arg,
+                                sanitize_args(kwargs[arg])))
+                cmd = "%s %s" % (command,
+                                 ' '.join(opts))
 
             return nmcli(self.cmdname,
-                   command=cmd)
+                         command=cmd)
 
         return run_action
 
@@ -97,7 +115,38 @@ NMCLI.nm = NMCommand(
          ("wwan", ["on", "off"])]
         )
 
+NMCLI.con = NMCommand(
+    "con",
+    [("list", [None, "id", "uuid"]),
+     ("status", [None, "id", "uuid", "path"]),
+     ("up", ["id", "uuid", "iface", "ap"]),
+     ("down", ["id", "uuid"]),
+     ("delete", ["id", "uuid"]),
+    ])
+
+
+NMCLI.dev = NMCommand(
+    "dev",
+    [("status", None),
+     ("list", [None, "iface"]),
+     ("disconnect", ["iface"]),
+     ("wifi", ["list"]),
+    ])
+
+
 if __name__ == '__main__':
     print NMCLI.nm.status()
+    print NMCLI.con.list(id=8302)
     print NMCLI.nm.enable(True)
-    print NMCLI.nm.enable("asdasd")
+
+    try:
+        print NMCLI.con.list(food=8302)
+        print "BAD!"
+    except:
+        pass
+
+    try:
+        print NMCLI.nm.enable("asdasd")
+        print "BAD!"
+    except:
+        pass
