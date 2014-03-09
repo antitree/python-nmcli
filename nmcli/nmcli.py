@@ -134,18 +134,18 @@ dev = NMCommand(
 
 
 if __name__ == '__main__':
-    print NMCLI.nm.status()
-    print NMCLI.con.list(id=8302)
-    print NMCLI.nm.enable(True)
+    print nm.status()
+    print nm.enable(True)
+    print nm.enable(False)
 
     try:
-        print NMCLI.con.list(food=8302)
+        print con.list(food=8302)
         print "BAD!"
     except:
         pass
 
     try:
-        print NMCLI.nm.enable("asdasd")
+        print nm.enable("asdasd")
         print "BAD!"
     except:
         pass
