@@ -97,41 +97,7 @@ NMCLI.nm = NMCommand(
          ("wwan", ["on", "off"])]
         )
 
-
-def get_nm_status():
-    """Execute and parse nmcli nm status"""
-    data = _nmcli('nm', 'status', ['running', 'state'])
-    return data[0]
-
-
-def get_nm_devices():
-    """Execute and parse nmcli dev status"""
-    devices = {}
-    fields = ['device', 'type', 'state']
-    data = _nmcli('dev', 'status', fields)
-    for row in data:
-        devices[row['device']] = {'type': row['type'], 'state': row['state']}
-    return devices
-
-
-def get_nm_dev_details(iface):
-    """Execute nmcli dev list iface"""
-    data = _nmcli('dev', 'list iface {0}'.format(iface), ['general'],
-                 multiline=True)
-    return data[0]
-
-
-def main(**kwargs):
-    nm = get_nm_status()
-
-    devices = get_nm_devices()
-    for iface in devices:
-        details = get_nm_dev_details(iface)
-        devices[iface].update(details)
-    nm['devices'] = devices
-
-
 if __name__ == '__main__':
-    #print NMCLI.nm.status()
+    print NMCLI.nm.status()
     print NMCLI.nm.enable(True)
     print NMCLI.nm.enable("asdasd")
