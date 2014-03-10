@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(name='python-nmcli',
       version='0.1.0',
-      description='Python wrapper around nmcli',
+      description='Python wrapper around nmcli (Linux NetworkManager CLI)',
       author='Zach Goldberg',
       author_email='zach@zachgoldberg.com',
       url='https://github.com/ZachGoldberg/python-nmcli',
