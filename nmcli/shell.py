@@ -39,6 +39,7 @@ NMCLI_FIELDS = {
         "gsm,cdma,bluetooth,802-11-olpc-mesh,vpn,infiniband,bond," +
         "vlan").split(","),
     'dev wifi': ("SSID BSSID MODE FREQ RATE SIGNAL SECURITY WPA-FLAGS RSN-FLAGS DEVICE ACTIVE DBUS-PATH").split(),
+    'dev list': ("GENERAL CAPABILITIES BOND VLAN CONNECTIONS WIFI-PROPERTIES AP WIRED-PROPERTIES IP4 DHCP4 IP6 DHCP6").split(),
     'nm permissions': ("PERMISSION VALUE").split()
 }
 
@@ -73,7 +74,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
 
     if command:
         args += shlex.split(command)
-
+    print args
     retcode, stdout, stderr = shell(args)
     data = []
     if retcode == 0:

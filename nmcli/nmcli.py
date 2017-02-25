@@ -111,9 +111,7 @@ nm = NMCommand(
          ("enable", [True, False]),
          ("sleep", [True, False]),
          ("wifi", ["on", "off"]),
-         ("wwan", ["on", "off"]),
-	 ("permissions",None),
-	]
+         ("wwan", ["on", "off"])]
         )
 
 con = NMCommand(
@@ -138,8 +136,7 @@ dev = NMCommand(
 if __name__ == '__main__':
     print nm.status()
     print nm.enable(True)
-    print nm.enable(False)
-    print nm.enable(True)
+
     try:
         print con.list(food=8302)
         print "BAD!"
