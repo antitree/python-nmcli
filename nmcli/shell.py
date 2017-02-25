@@ -17,7 +17,7 @@
 
 import shlex
 import subprocess
-
+import re
 
 DOCUMENTATION = '''
 ---
@@ -38,8 +38,8 @@ NMCLI_FIELDS = {
         "802-11-wireless-security,ipv4,ipv6,serial,ppp,pppoe," +
         "gsm,cdma,bluetooth,802-11-olpc-mesh,vpn,infiniband,bond," +
         "vlan").split(","),
-    'dev wifi': ("SSID BSSID MODE FREQ RATE SIGNAL SECURITY WPA-FLAGS RSN-FLAGS DEVICE ACTIVE DBUS-PATH").split()
-
+    'dev wifi': ("SSID BSSID MODE FREQ RATE SIGNAL SECURITY WPA-FLAGS RSN-FLAGS DEVICE ACTIVE DBUS-PATH").split(),
+    'nm permissions': ("PERMISSION VALUE").split()
 }
 
 
@@ -75,7 +75,6 @@ def nmcli(obj, command=None, fields=None, multiline=False):
         args += shlex.split(command)
 
     retcode, stdout, stderr = shell(args)
-    print stderr
     data = []
     if retcode == 0:
         if multiline:
@@ -90,7 +89,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
             data.append(row)
         else:
             for line in stdout.split('\n'):
-                values = line.split(':')
+                values = re.split(r'(?<!\\):', line)
                 if len(values) == len(fields):
                     row = dict(zip(fields, values))
                     data.append(row)
