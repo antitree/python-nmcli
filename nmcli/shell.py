@@ -37,7 +37,8 @@ NMCLI_FIELDS = {
         "connection,802-3-ethernet,802-1x,802-11-wireless," +
         "802-11-wireless-security,ipv4,ipv6,serial,ppp,pppoe," +
         "gsm,cdma,bluetooth,802-11-olpc-mesh,vpn,infiniband,bond," +
-        "vlan").split(",")
+        "vlan").split(","),
+    'dev wifi': ("SSID BSSID MODE FREQ RATE SIGNAL SECURITY WPA-FLAGS RSN-FLAGS DEVICE ACTIVE DBUS-PATH").split()
 
 }
 
@@ -64,13 +65,17 @@ def nmcli(obj, command=None, fields=None, multiline=False):
         multiline = True
         fields = NMCLI_FIELDS["%s list" % obj]
 
+    if command:
+        if ("%s %s" % (obj,command)) in NMCLI_FIELDS:
+            fields=NMCLI_FIELDS[("%s %s" % (obj,command))]
+
     args = ['nmcli', '--terse', '--fields', ",".join(fields), obj]
 
     if command:
         args += shlex.split(command)
 
     retcode, stdout, stderr = shell(args)
-
+    print stderr
     data = []
     if retcode == 0:
         if multiline:
