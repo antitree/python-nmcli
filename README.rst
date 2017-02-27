@@ -15,8 +15,8 @@ Example
 
 Example code that uses this library
  
-    import nmcli
-    print nmcli.nm.permissions()
+    from nmcli import nm
+    print nm.permissions()
     print nm.status()
     print nm.enable(True)
     

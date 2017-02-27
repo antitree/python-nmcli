@@ -74,7 +74,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
 
     if command:
         args += shlex.split(command)
-    print args
+
     retcode, stdout, stderr = shell(args)
     data = []
     if retcode == 0:
