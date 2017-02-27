@@ -136,7 +136,6 @@ dev = NMCommand(
 if __name__ == '__main__':
     print nm.status()
     print nm.enable(True)
-    print nm.enable(False)
 
     try:
         print con.list(food=8302)

@@ -17,7 +17,7 @@
 
 import shlex
 import subprocess
-
+import re
 
 DOCUMENTATION = '''
 ---
@@ -37,8 +37,10 @@ NMCLI_FIELDS = {
         "connection,802-3-ethernet,802-1x,802-11-wireless," +
         "802-11-wireless-security,ipv4,ipv6,serial,ppp,pppoe," +
         "gsm,cdma,bluetooth,802-11-olpc-mesh,vpn,infiniband,bond," +
-        "vlan").split(",")
-
+        "vlan").split(","),
+    'dev wifi': ("SSID BSSID MODE FREQ RATE SIGNAL SECURITY WPA-FLAGS RSN-FLAGS DEVICE ACTIVE DBUS-PATH").split(),
+    'dev list': ("GENERAL CAPABILITIES BOND VLAN CONNECTIONS WIFI-PROPERTIES AP WIRED-PROPERTIES IP4 DHCP4 IP6 DHCP6").split(),
+    'nm permissions': ("PERMISSION VALUE").split()
 }
 
 
@@ -64,13 +66,16 @@ def nmcli(obj, command=None, fields=None, multiline=False):
         multiline = True
         fields = NMCLI_FIELDS["%s list" % obj]
 
+    if command:
+        if ("%s %s" % (obj,command)) in NMCLI_FIELDS:
+            fields=NMCLI_FIELDS[("%s %s" % (obj,command))]
+
     args = ['nmcli', '--terse', '--fields', ",".join(fields), obj]
 
     if command:
         args += shlex.split(command)
-
+    print args
     retcode, stdout, stderr = shell(args)
-
     data = []
     if retcode == 0:
         if multiline:
@@ -85,7 +90,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
             data.append(row)
         else:
             for line in stdout.split('\n'):
-                values = line.split(':')
+                values = re.split(r'(?<!\\):', line)
                 if len(values) == len(fields):
                     row = dict(zip(fields, values))
                     data.append(row)
