@@ -1,1 +1,1 @@
-from nmcli import *
+from .nmcli import *

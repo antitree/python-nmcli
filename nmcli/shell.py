@@ -92,7 +92,7 @@ def nmcli(obj, command=None, fields=None, multiline=False):
             for line in stdout.split('\n'):
                 values = re.split(r'(?<!\\):', line)
                 if len(values) == len(fields):
-                    row = dict(zip(fields, values))
+                    row = dict(list(zip(fields, values)))
                     data.append(row)
         return data
     else:

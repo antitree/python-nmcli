@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from shell import nmcli
+from .shell import nmcli
 
 
 DOCUMENTATION = '''
@@ -78,7 +78,7 @@ class NMCommand(object):
                 args = [args]
 
             if kwargs:
-                args.extend(kwargs.keys())
+                args.extend(list(kwargs.keys()))
 
             args = verify_args(args)
 
@@ -134,17 +134,17 @@ dev = NMCommand(
 
 
 if __name__ == '__main__':
-    print nm.status()
-    print nm.enable(True)
+    print((nm.status()))
+    print((nm.enable(True)))
 
     try:
-        print con.list(food=8302)
-        print "BAD!"
+        print((con.list(food=8302)))
+        print("BAD!")
     except:
         pass
 
     try:
-        print nm.enable("asdasd")
-        print "BAD!"
+        print((nm.enable("asdasd")))
+        print("BAD!")
     except:
         pass
